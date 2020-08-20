@@ -20,7 +20,8 @@ class Server {
         mongoose.Promise = global.Promise;
         return mongoose.connect(environment_1.environment.db.url, {
             useNewUrlParser: true,
-            useUnifiedTopology: true
+            useUnifiedTopology: true,
+            useCreateIndex: true,
         });
     }
     initRoutes(routers) {
@@ -44,8 +45,6 @@ class Server {
                 this.application.get('/info', [(req, res, next) => {
                         if (req.userAgent() &&
                             req.userAgent().includes('MSIE 7.0')) {
-                            // res.status(400);
-                            // res.json({message:'Please, update your browser.'})
                             let error = new Error();
                             error.statusCode = 400;
                             error.message = 'Please, update your browser.';
@@ -62,7 +61,6 @@ class Server {
                         });
                         return next();
                     }]);
-                // this.application.on('error',)
             }
             catch (error) {
                 reject(error);
@@ -72,6 +70,11 @@ class Server {
     bootstrap(routers = []) {
         return __awaiter(this, void 0, void 0, function* () {
             return this.initializeDb().then(() => this.initRoutes(routers).then(() => this));
+        });
+    }
+    shutdown() {
+        return __awaiter(this, void 0, void 0, function* () {
+            return mongoose.disconnect().then(() => this.application.close());
         });
     }
 }
